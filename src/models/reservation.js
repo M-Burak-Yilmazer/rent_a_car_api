@@ -39,6 +39,18 @@ const ReservationSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    amount: {
+      type: Number,
+      required: true,
+    },
+    updatedId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    createdId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   {
     timestamps: true,

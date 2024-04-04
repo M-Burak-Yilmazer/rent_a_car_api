@@ -13,18 +13,18 @@ const Car = require("../controllers/car");
 
 // URL: /cars
 
-const { isAdmin } = require("../middlewares/permissions");
+const { isAdmin, isLogin ,isStaffOrIsAdmin} = require("../middlewares/permissions");
 
 router.use(isAdmin);
 
-router.route("/").get(Car.list).post(Car.create);
+router.route("/").get(Car.list).post(isStaffOrIsAdmin,Car.create);
 
 router
   .route("/:id")
   .get(Car.read)
-  .put(Car.update)
-  .patch(Car.update)
-  .delete(Car.delete);
+  .put(isStaffOrIsAdmin,Car.update)
+  .patch(isStaffOrIsAdmin,Car.update)
+  .delete(isAdmin,Car.delete);
 
 /* ------------------------------------------------------- */
 module.exports = router;

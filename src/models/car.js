@@ -34,7 +34,7 @@ const { mongoose } = require("../configs/dbConnection");
 const CarSchema = new mongoose.Schema(
   {
     plateNumber: {
-      type: Number,
+      type: String,
       unique: true,
       trim: true,
       required: true,
@@ -54,6 +54,8 @@ const CarSchema = new mongoose.Schema(
       type: Number,
       trim: true,
       required: true,
+      min: 1990,
+      max: new Date().getFullYear(),
     },
     isAutomatic: {
       type: Boolean,
@@ -66,12 +68,22 @@ const CarSchema = new mongoose.Schema(
       required: true,
     },
 
-    isPublish: {
+    isAvailable: {
       type: Boolean,
       default: true,
+    },
+    createdId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    updatedId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
   },
   { collection: "cars", timestamps: true }
 );
 
-module.exports =    mongoose.model("Car", CarSchema)
+module.exports = mongoose.model("Car", CarSchema);

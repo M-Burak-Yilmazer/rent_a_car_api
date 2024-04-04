@@ -5,6 +5,7 @@
 // Car Controller:
 
 const Car = require("../models/car");
+const Reservation = require("../models/reservation");
 
 /* ------------------------------------------------------- */
 
@@ -25,34 +26,51 @@ module.exports = {
 `,
 
 
+
 */
-    const cars = await Car.find();
+    // const cars = await Car.find();
+    let customFilter = { isAvailable: true };
+
+    const { startDate: getStartDate, endDate: getEndDate } = req.query;
+    if (getStartDate && getEndDate) {
+      const reservedCars = await Reservation.find({
+        $nor: [
+          { startDate: { $gt: getEndDate } },
+          { endDate: { $lt: getStartDate } },
+        ],
+      }, {_id:0,  carId: 1 }).distinct("carId")
+      console.log(reservedCars) 
+      customFilter._id= { $nin: reservedCars }// reserve edilmiş araçlar dönüyor bize
+    } else {
+      throw new Error("stardate and enddate must be ");
+    }
+
+    const data = await res.getModelList(Car, customFilter, [
+      { path: "createdId", select: "username" },
+      { path: "updatedId", select: "username" },
+    ]);
+
     res.status(200).send({
       error: false,
       message: "All Cars",
-      data: cars,
+      data,
+      details: await res.getModelListDetails(Car),
     });
   },
   create: async (req, res) => {
-    /* 
-                    #swagger.tags = ["Car"]
-                    #swagger.summary = "Create Car"
-                    #swagger.parameters["body"] = {
-                    in:"body",
-                    required: true,
-                    schema: {
-                        "plateNumber": "34ABC345",
-                        "brand": "Opel",
-                        "model": "Astra",
-                        "year": 2021,
-                        "isAutomatic": false,
-                        "pricePerDay": 189.99,
-                        "isPublish": false
-                    }
-                    }   
-
-*/
-
+    /*
+            #swagger.tags = ["Cars"]
+            #swagger.summary = "Create Car"
+            #swagger.parameters['body'] = {
+                in: 'body',
+                required: true,
+                schema: {
+                    $ref: '#/definitions/Car'
+                }
+            }
+        */
+    req.body.createdId = req.user._id;
+    req.body.updatedId = req.user._id;
     const car = await Car.create(req.body);
     res.status(201).send({
       error: false,
@@ -65,7 +83,10 @@ module.exports = {
       #swagger.tags = ["Car"]
       #swagger.summary = "Get Single Car"
      */
-    const car = await Car.findOne({ _id: req.params.id });
+    const car = await Car.findOne({ _id: req.params.id }).populate([
+      { path: "createdId", select: "username" },
+      { path: "updatedId", select: "username" },
+    ]);
     res.status(200).send({
       error: false,
       data: car,
@@ -74,20 +95,15 @@ module.exports = {
   update: async (req, res) => {
     /*
      #swagger.tags = ["Car"]
-     #swagger.summary = "Update Car"
-     #swagger.parameters["body"] = {
-     in:"body",
-     required: true,
-     schema: {
-         "plateNumber": "34ABC345", 
-         "brand": "Opel",
-         "model": "Astra",
-         "year": 2021,
-         "isAutomatic": false,
-         "pricePerDay": 189.99,
-         "isPublish": false
-
-     }
+     #swagger.summary = "Update Car"  
+            #swagger.parameters['body'] = {
+                in: 'body',
+                required: true,
+                schema: {
+                    $ref: '#/definitions/Car'
+                }
+            }
+        
      
      }
      */

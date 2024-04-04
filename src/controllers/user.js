@@ -52,6 +52,10 @@ module.exports = {
         req.body.isStaff=false
         req.body.isAdmin=false
         */
+      if (!req.user?.isAdmin) {
+        req.body.isStaff = false;
+        req.body.isAdmin = false;
+      }
         const data = await User.create(req.body)
 
         res.status(201).send({
@@ -67,9 +71,9 @@ module.exports = {
         */
        
         //? Yetkisiz kullanıcının başka bir kullanıcıyı yönetmesini engelle (sadece kendi verileri):
-        // if (!req.user.isAdmin) {
-        //     req.params.id = req.user.id
-        // }
+        if (!req.user.isAdmin) {
+            req.params.id = req.user.id
+        }
         // const data = await User.findOne({ _id: req.params.id })
 
         //? Yetkisiz kullanıcının başka bir kullanıcıyı yönetmesini engelle (sadece kendi verileri):
@@ -102,7 +106,12 @@ module.exports = {
         */
 
         //? Yetkisiz kullanıcının başka bir kullanıcıyı yönetmesini engelle (sadece kendi verileri):
-        if (!req.user.isAdmin) req.params.id = req.user._id
+        if (!req.user.isAdmin){
+            delete req.body.isStaff
+            delete req.body.isAdmin
+        }
+        
+        req.params.id = req.user._id
         const data = await User.updateOne({ _id: req.params.id }, req.body, { runValidators: true })
 
         res.status(202).send({

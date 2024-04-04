@@ -9,9 +9,9 @@ router.use("/users", require("./user"));
 //token
 router.use("/tokens", require("./token"));
 
-//order
+//cars
 router.use("/cars", require("./car"));
-//pizza
-// router.use("/reservations", require("./reservation"));
+//reservations
+router.use("/reservations", require("./reservation"));
 
 module.exports = router;
